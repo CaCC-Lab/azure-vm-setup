@@ -12,7 +12,7 @@ sudo systemctl enable ollama
 sudo systemctl start ollama
 
 echo "[3/5] Flaskアプリの取得とセットアップ"
-cd /home/azureuser
+cd /home/ryu
 git clone https://github.com/CaCC-Lab/flask-ollama-chat.git
 cd flask-ollama-chat
 python3 -m venv venv
