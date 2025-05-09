@@ -2,6 +2,17 @@
 
 set -e
 
+# APIキーをユーザーに入力させる
+read -p "OpenAI APIキーを入力してください: " OPENAI_API_KEY
+read -p "Google APIキーを入力してください: " GOOGLE_API_KEY
+read -p "Flaskシークレットキーを入力してください（自動生成可）: " FLASK_SECRET_KEY
+
+# シークレットキーが空なら自動生成
+if [ -z "$FLASK_SECRET_KEY" ]; then
+    FLASK_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(16))")
+    echo "Flaskシークレットキーを自動生成しました: $FLASK_SECRET_KEY"
+fi
+
 echo "[1/5] パッケージ更新＆必要ソフトのインストール"
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl git python3 python3-venv python3-pip nginx
@@ -26,6 +37,9 @@ After=network.target
 [Service]
 User=ryu
 WorkingDirectory=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp
+Environment="OPENAI_API_KEY=${OPENAI_API_KEY}"
+Environment="GOOGLE_API_KEY=${GOOGLE_API_KEY}"
+Environment="FLASK_SECRET_KEY=${FLASK_SECRET_KEY}"
 ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8001 roleplay-chatbot-wepapp-main:app
 
 [Install]
