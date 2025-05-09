@@ -26,7 +26,7 @@ After=network.target
 [Service]
 User=ryu
 WorkingDirectory=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp
-ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8001 app:app
+ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8001 roleplay-chatbot-wepapp-main:app
 
 [Install]
 WantedBy=multi-user.target
@@ -50,6 +50,7 @@ server {
     }
 }
 EOF
+
 sudo ln -sf /etc/nginx/sites-available/roleplay /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 
