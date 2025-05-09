@@ -2,16 +2,10 @@
 
 set -e
 
-# APIキーをユーザーに入力させる
-read -p "OpenAI APIキーを入力してください: " OPENAI_API_KEY
-read -p "Google APIキーを入力してください: " GOOGLE_API_KEY
-read -p "Flaskシークレットキーを入力してください（自動生成可）: " FLASK_SECRET_KEY
-
-# シークレットキーが空なら自動生成
-if [ -z "$FLASK_SECRET_KEY" ]; then
-    FLASK_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(16))")
-    echo "Flaskシークレットキーを自動生成しました: $FLASK_SECRET_KEY"
-fi
+# APIキーを直接スクリプトに埋め込む
+OPENAI_API_KEY="sk-XXXXXXXXXXXXXXXXXXXX"
+GOOGLE_API_KEY="abc-XXXXXXXXXXXXXXXXXXXX"
+FLASK_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(16))")
 
 echo "[1/5] パッケージ更新＆必要ソフトのインストール"
 sudo apt update && sudo apt upgrade -y
@@ -26,9 +20,16 @@ cd roleplay-chatbot-wepapp
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-pip install gunicorn
+pip install gunicorn python-dotenv
 
-echo "[3/5] Gunicornサービスの登録"
+echo "[3/5] .envファイルの作成"
+cat > /home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/.env << EOF
+OPENAI_API_KEY=${OPENAI_API_KEY}
+GOOGLE_API_KEY=${GOOGLE_API_KEY}
+FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+EOF
+
+echo "[4/5] Gunicornサービスの登録"
 sudo tee /etc/systemd/system/roleplay-gunicorn.service > /dev/null << EOF
 [Unit]
 Description=Gunicorn instance to serve roleplay-chatbot-webapp
@@ -37,9 +38,6 @@ After=network.target
 [Service]
 User=ryu
 WorkingDirectory=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp
-Environment="OPENAI_API_KEY=${OPENAI_API_KEY}"
-Environment="GOOGLE_API_KEY=${GOOGLE_API_KEY}"
-Environment="FLASK_SECRET_KEY=${FLASK_SECRET_KEY}"
 ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8001 roleplay-chatbot-wepapp-main:app
 
 [Install]
@@ -51,7 +49,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable roleplay-gunicorn
 sudo systemctl start roleplay-gunicorn
 
-echo "[4/5] Nginxの設定と起動"
+echo "[5/5] Nginxの設定と起動"
 sudo tee /etc/nginx/sites-available/roleplay > /dev/null << EOF
 server {
     listen 81;
