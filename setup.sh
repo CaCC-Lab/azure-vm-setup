@@ -52,7 +52,7 @@ sudo systemctl start roleplay-gunicorn
 echo "[5/5] Nginxの設定と起動"
 sudo tee /etc/nginx/sites-available/roleplay > /dev/null << EOF
 server {
-    listen 80;
+    listen 81;
     server_name _;
 
     location / {
