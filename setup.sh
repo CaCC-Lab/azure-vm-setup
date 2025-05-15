@@ -38,7 +38,7 @@ After=network.target
 [Service]
 User=ryu
 WorkingDirectory=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp
-ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8001 roleplay-chatbot-wepapp-main:app
+ExecStart=/home/ryu/roleplay-chatbot/roleplay-chatbot-wepapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 roleplay-chatbot-wepapp-main:app
 
 [Install]
 WantedBy=multi-user.target
@@ -56,7 +56,7 @@ server {
     server_name _;
 
     location / {
-        proxy_pass http://localhost:8001;
+        proxy_pass http://localhost:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
     }
